@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Fire's Forum — Install</title>
@@ -21,6 +21,7 @@
       --accent: #FF8B44;
       --accent-dark: #2B223E;
       --card-bg: rgba(0,0,0,0.36);
+      --text-muted: rgba(255,255,255,0.85);
     }
     html,body{height:100%;margin:0}
     body{
@@ -36,7 +37,7 @@
       text-align:center;
     }
 
-    /* Fundo */
+    /* Background images */
     .bg-image, .fg-image {
       position:absolute;
       left:50%;
@@ -67,7 +68,7 @@
     .logo { width:140px; margin:0 auto 10px auto; display:block; }
     h1 { font-size:2.2rem; margin:6px 0; display:flex; gap:10px; align-items:center; justify-content:center; }
     .wave { width:1.7em; height:1em; vertical-align:middle; }
-    p { margin:10px 0 18px; color:rgba(255,255,255,0.95); line-height:1.25; }
+    p { margin:10px 0 18px; color:var(--text-muted); line-height:1.25; }
     .hint { color:rgba(255,255,255,0.8); margin-bottom:18px; font-size:0.95rem }
 
     .actions { display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
@@ -114,27 +115,27 @@
   </style>
 </head>
 <body>
-  <!-- background images (mesmos que você usa) -->
+  <!-- background images (the same ones you used) -->
   <img class="bg-image" src="https://cdn.discordapp.com/attachments/1326638981319753798/1454475733039583317/1004_Sem_Titulo_20251227104553.png?ex=69513995&is=694fe815&hm=c43ea7fd484e42cf3da788900e6e3af021f889b82e1f907828567752f1c7fa7d&" alt="bg back">
   <img class="fg-image" src="https://cdn.discordapp.com/attachments/1326638981319753798/1454475771547484374/1004_Sem_Titulo_20251227104556.png?ex=6951399e&is=694fe81e&hm=fed21d231cbafed279fd4393045f1669bbbd98046cc011c6b6b91e604b1f08ca&" alt="bg front">
 
   <div class="card" id="card">
     <img class="logo" src="https://cdn.discordapp.com/attachments/1326638981319753798/1454484621688438967/Untitled995_20251227113851.png?ex=695141dc&is=694ff05c&hm=b22c193811838d00a07637caf05e4c4a4e10354dd694d336aa2a62b4095106de&" alt="Fire's Forum">
-    <h1>Fire's Forum <img class="wave" src="https://cdn.discordapp.com/attachments/1326638981319753798/1454473171947360360/image_search_1766843507156.gif?ex=69513732&is=694fe5b2&hm=225a9f4a5fe055b06c5249e03b392f18f86bee36b52f6a8b111a7602759a10b5&" alt="wave"></h1>
+    <h1 id="title">Helooow <img class="wave" src="https://cdn.discordapp.com/attachments/1326638981319753798/1454473171947360360/image_search_1766843507156.gif?ex=69513732&is=694fe5b2&hm=225a9f4a5fe055b06c5249e03b392f18f86bee36b52f6a8b111a7602759a10b5&" alt="wave"></h1>
 
     <p id="mainText">
-      Para acessar o Fire's Forum é necessário instalá-lo.<br>
-      Instalar cria um atalho e abre em modo app (tela cheia).
+      To access Fire's Forum, you must install the app.<br>
+      Installing creates a home-screen shortcut and opens in app mode (fullscreen).
     </p>
 
-    <div class="hint" id="hintText">Use Chrome / Edge (Android ou Desktop) para instalar. No iOS a instalação é limitada.</div>
+    <div class="hint" id="hintText">Use Chrome / Edge (Android or Desktop) for best installation support. iOS has limited PWA support.</div>
 
     <div class="actions" id="actions">
-      <button class="btn" id="installBtn">Install</button>
-      <button class="btn ghost" id="openManual" style="display:none">Como instalar (manual)</button>
+      <button class="btn" id="installBtn" style="display:none">Install</button>
+      <button class="btn ghost" id="openManual" style="display:none">How to install</button>
     </div>
 
-    <div class="note" id="statusNote"></div>
+    <div class="note" id="statusNote" aria-live="polite"></div>
   </div>
 
   <div class="credits">
@@ -143,117 +144,116 @@
   </div>
 
   <script>
-    // PWA registration (service-worker.js must exist in same folder)
+    // register service worker (must exist)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('service-worker.js')
-          .then(() => console.log('SW registrado'))
-          .catch(e => console.warn('SW registro falhou', e));
+          .then(() => console.log('Service Worker registered'))
+          .catch(e => console.warn('SW registration failed', e));
       });
     }
 
-    // utils
-    const installBtn = document.getElementById('installBtn');
-    const openManual = document.getElementById('openManual');
-    const statusNote = document.getElementById('statusNote');
-    const hintText = document.getElementById('hintText');
-
+    // helpers
     function isInstalled() {
       return window.matchMedia('(display-mode: standalone)').matches ||
              window.navigator.standalone === true;
     }
 
-    // se já estiver instalado -> redireciona para enter.html
-    if (isInstalled()) {
-      // redireciona rapidamente
-      window.location.href = 'enter.html';
-    }
+    // If opened as installed app (standalone) -> go to DX/enter.html
+    // This check runs on load; it ensures only installed-apps get redirected.
+    window.addEventListener('DOMContentLoaded', () => {
+      if (isInstalled()) {
+        // small delay so user sees something then redirect
+        setTimeout(() => { window.location.href = 'DX/enter.html'; }, 300);
+        return;
+      }
+    });
 
-    // handle beforeinstallprompt
+    // UI elements
+    const installBtn = document.getElementById('installBtn');
+    const openManual = document.getElementById('openManual');
+    const statusNote = document.getElementById('statusNote');
+
+    // beforeinstallprompt flow
     let deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      // se for ?install=1 mostra o botão
+
+      // show install UI if query ?install=1 OR if browser supports it
       const params = new URLSearchParams(location.search);
-      if (params.get('install') === '1') {
-        showInstall();
-      } else {
-        // show install button anyway so user can press if available
-        showInstall();
+      if (params.get('install') === '1' || true) {
+        showInstallUI();
       }
     });
 
-    // se o navegador já não disparou beforeinstallprompt, mas a query ?install=1 foi usada,
-    // mostramos instruções manuais.
+    // If the page is opened with ?install=1 but the browser didn't fire beforeinstallprompt,
+    // show manual instructions button after a short delay.
     const params = new URLSearchParams(location.search);
     if (params.get('install') === '1') {
-      // se beforeinstallprompt ainda não ocorreu, avisar e mostrar manual
       setTimeout(() => {
         if (!deferredPrompt && !isInstalled()) {
           openManual.style.display = 'inline-block';
           installBtn.textContent = 'Show install instructions';
+          installBtn.style.display = 'inline-block';
         }
       }, 700);
     }
 
-    // appinstalled event
+    // appinstalled event: show note but DO NOT redirect here (we only redirect when app is opened as standalone)
     window.addEventListener('appinstalled', () => {
-      statusNote.textContent = 'App instalado com sucesso — abrindo...';
-      setTimeout(() => window.location.href = 'enter.html', 700);
+      statusNote.textContent = 'App installed successfully. Open it from your home screen to continue.';
     });
 
-    function showInstall() {
+    function showInstallUI() {
       installBtn.style.display = 'inline-block';
       openManual.style.display = 'none';
+      statusNote.textContent = '';
     }
 
     installBtn.addEventListener('click', async () => {
-      // se já instalado por algum motivo
+      // if already installed (edge case), go straight to enter
       if (isInstalled()) {
-        window.location.href = 'enter.html';
+        window.location.href = 'DX/enter.html';
         return;
       }
 
+      // if we have the beforeinstallprompt event, prompt it
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const choice = await deferredPrompt.userChoice;
         if (choice.outcome === 'accepted') {
-          statusNote.textContent = 'Obrigado! Instalando...';
-          // redireciona se for executado como app
-          setTimeout(() => {
-            if (isInstalled()) window.location.href = 'enter.html';
-          }, 900);
+          statusNote.textContent = 'Thank you! The app was accepted. Open it from your home screen to continue.';
         } else {
-          statusNote.textContent = 'Instalação rejeitada.';
+          statusNote.textContent = 'Installation dismissed. You can install later from the menu.';
         }
         deferredPrompt = null;
+        // keep the page visible — we do NOT redirect here
       } else {
-        // fallback: abrir instruções manuais
+        // fallback: show manual instructions
         openManual.style.display = 'inline-block';
+        if (installBtn.textContent.indexOf('Show') === -1) installBtn.textContent = 'Show install instructions';
       }
     });
 
     openManual.addEventListener('click', () => {
-      // mostra instruções simples dependendo de userAgent
       const ua = navigator.userAgent || '';
       if (/Android/i.test(ua)) {
-        alert('No Android (Chrome): Menu (⋮) → Adicionar à tela inicial → Confirmar.');
+        alert('On Android (Chrome): open the browser menu (⋮) → Add to Home screen → Confirm.');
       } else if (/Chrome|Edge|Brave/i.test(ua) && /Windows|Mac|Linux/i.test(ua)) {
-        alert('No desktop (Chrome/Edge): clique no ícone de instalar na barra de endereço ou menu ⋮ → Instalar.');
+        alert('On desktop Chrome/Edge: click the install icon in the address bar or menu ⋮ → Install.');
       } else if (/iPhone|iPad|iPod/i.test(ua)) {
-        alert('No iOS (Safari): botão compartilhar → Adicionar à Tela de Início. (Apple limita PWA).');
+        alert('On iOS (Safari): tap the Share icon → Add to Home Screen. (iOS has limited PWA support).');
       } else {
-        alert('Tente usar Chrome/Edge em Android ou Desktop para instalar.');
+        alert('Try Chrome/Edge on Android or Desktop for full install support.');
       }
     });
 
-    // se o usuário abrir sem ?install=1, deixar o botão visível para quem tiver beforeinstallprompt
-    // (se already available showInstall())
+    // If the beforeinstallprompt never fired but the browser allows install UI later,
+    // we still try to show the button after a short timeout.
     setTimeout(() => {
-      if (!isInstalled() && deferredPrompt) showInstall();
-    }, 500);
-
+      if (!isInstalled() && deferredPrompt) showInstallUI();
+    }, 600);
   </script>
 </body>
 </html>
