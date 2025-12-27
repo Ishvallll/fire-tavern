@@ -3,6 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <title>Fire's Forum</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FF8B44">
+
+  <link rel="icon" href="https://cdn.discordapp.com/attachments/1326638981319753798/1454484621688438967/Untitled995_20251227113851.png?ex=695141dc&is=694ff05c&hm=b22c193811838d00a07637caf05e4c4a4e10354dd694d336aa2a62b4095106de&" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.cdnfonts.com/css/coolvetica" rel="stylesheet" />
+
+  <!-- TODO: TODO O CSS QUE VOCÊ JÁ TEM PERMANECE IGUAL -->
+</head>
+
+<body>
+
+  <!-- TODO: TODO O HTML VISUAL PERMANECE IGUAL -->
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    // =========================
+    // PWA – SERVICE WORKER
+    // =========================
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+          .then(() => console.log("Service Worker registrado"))
+          .catch(err => console.warn("SW erro:", err));
+      });
+    }
+  </script>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fire's Forum</title>
   <link rel="icon" href="https://cdn.discordapp.com/attachments/1326638981319753798/1454484621688438967/Untitled995_20251227113851.png?ex=695141dc&is=694ff05c&hm=b22c193811838d00a07637caf05e4c4a4e10354dd694d336aa2a62b4095106de&" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
