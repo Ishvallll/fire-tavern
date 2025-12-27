@@ -1,1 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Fire's Forum — Testing Chat</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="../Untitled995_20251227113851.png">
 
+  <style>
+    :root{
+      --b1: #282D31;
+      --b2: #2D3238; /* background as requested */
+      --b3: #383E45;
+      --u0: #0444BC;
+      --o0: #FF8B44;
+      --e0: #2B223E;
+      --glass: rgba(255,255,255,0.02);
+      --muted: rgba(255,255,255,0.65);
+    }
+
+    html,body{ height:100%; margin:0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: var(--b2); color: #fff; }
+
+    /* Top-left testing button */
+    .top-left-btn {
+      position: fixed;
+      left: 16px;
+      top: 16px;
+      z-index: 50;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.04);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+      font-weight: 700;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 72px auto 88px; /* leave space for top button and bottom bar */
+      padding: 18px;
+      height: calc(100vh - 180px);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      justify-content:space-between;
+    }
+    .left {
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo-mini {
+      width:46px; height:46px; border-radius:8px; background:var(--b3); display:inline-block; background-image:url('../Untitled995_20251227113851.png'); background-size:cover; background-position:center;
+    }
+    .title { font-size:1.1rem; font-weight:800; letter-spacing:0.2px; }
+    .subtitle { color:var(--muted); font-size:0.9rem; margin-left:6px; font-weight:500; }
+
+    .user-label {
+      font-size:0.95rem;
+      color:var(--muted);
+      display:flex;
+      gap:8px;
+      align-items:center;
+      margin-left: 12px;
+    }
+
+    /* chat box */
+    .chat {
+      flex:1;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+      border-radius: 12px;
+      padding: 12px;
+      overflow-y: auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+      border: 1px solid rgba(0,0,0,0.12);
+    }
+
+    .msg {
+      display:flex;
+      gap:10px;
+      margin:8px 4px;
+      align-items:flex-start;
+    }
+
+    .avatar {
+      width:36px; height:36px; border-radius:8px; background:var(--b3); flex:0 0 36px;
+      display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff;
+      font-size:0.9rem;
+    }
+
+    .bubble {
+      background: rgba(0,0,0,0.24);
+      padding: 8px 12px;
+      border-radius: 8px;
+      max-width: 78%;
+      word-wrap: break-word;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.02);
+    }
+
+    .meta {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom:6px;
+    }
+
+    .bubble .text { font-size: 0.98rem; line-height:1.22; }
+    .bubble .time { display:block; margin-top:6px; font-size:0.72rem; color: rgba(255,255,255,0.45); text-align:right; }
+
+    .bubble img.content-image {
+      max-width: 320px;
+      width: auto;
+      height: auto;
+      border-radius: 8px;
+      display:block;
+      margin-top:6px;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    /* bottom input bar */
+    .composer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.12));
+      border-top: 1px solid rgba(0,0,0,0.12);
+      backdrop-filter: blur(6px);
+    }
+
+    .composer-inner {
+      width: min(980px, calc(100% - 32px));
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .input {
+      flex:1;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      background: rgba(255,255,255,0.03);
+      padding:8px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    .input input {
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 10px;
+      color: #fff;
+      width: 100%;
+      font-size: 0.95rem;
+    }
+
+    .send-btn {
+      background: var(--u0);
+      color: #fff;
+      border: none;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .image-btn {
+      background: var(--o0);
+      color: var(--e0);
+      border: none;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .small {
+      font-size:0.82rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* empty state */
+    .empty {
+      text-align:center;
+      color: rgba(255,255,255,0.5);
+      margin-top: 18px;
+    }
+
+    @media (max-width:520px){
+      .container{ margin:88px 12px 140px; height: calc(100vh - 240px); }
+      .title{ font-size:1rem; }
+      .bubble img.content-image { max-width: 60vw; }
+    }
+  </style>
+</head>
+<body>
+  <button class="top-left-btn" id="testingBtn">🪄 Testing Page</button>
+
+  <div class="container">
+    <div class="header">
+      <div class="left">
+        <div class="logo-mini" aria-hidden="true"></div>
+        <div>
+          <div class="title">Fire's Forum — Live Chat (testing)</div>
+          <div class="subtitle">Global chat — messages saved under <code>alivechat</code></div>
+        </div>
+      </div>
+
+      <div class="user-label" id="userLabel">
+        <!-- current username will appear here -->
+      </div>
+    </div>
+
+    <div id="chat" class="chat" aria-live="polite" role="log">
+      <div class="empty" id="empty">Loading messages…</div>
+    </div>
+  </div>
+
+  <div class="composer" role="region" aria-label="Message composer">
+    <div class="composer-inner">
+      <div class="input" id="inputWrap">
+        <input id="msgInput" type="text" placeholder="Type a message and press Enter — messages are public (global)..." autocomplete="off" />
+      </div>
+
+      <!-- Image button -->
+      <input id="fileInput" type="file" accept="image/*" style="display:none" capture="environment" />
+      <button class="image-btn" id="imageBtn" title="Send image">Image</button>
+
+      <!-- Send button -->
+      <button class="send-btn" id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+    // ---------- config ----------
+    const firebaseConfig = { databaseURL: "https://fire-tavern-default-rtdb.firebaseio.com/" };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ---------- elements ----------
+    const chatEl = document.getElementById('chat');
+    const emptyEl = document.getElementById('empty');
+    const inputEl = document.getElementById('msgInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const imageBtn = document.getElementById('imageBtn');
+    const fileInput = document.getElementById('fileInput');
+    const testingBtn = document.getElementById('testingBtn');
+    const userLabel = document.getElementById('userLabel');
+
+    // ---------- user ----------
+    const STORAGE_KEY = "fire_forum_user";
+    let username = localStorage.getItem(STORAGE_KEY) || null;
+    if (!username) {
+      username = 'Guest_' + Math.floor(Math.random()*9000 + 1000);
+    }
+    userLabel.textContent = 'Signed in as: ' + username;
+
+    // sanitize text for display
+    function escapeHtml(s){
+      if (!s) return '';
+      return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+
+    // show message in DOM
+    function addMessageToDOM(data) {
+      const { user, message, ts, image } = data;
+      // remove empty placeholder
+      if (emptyEl) {
+        emptyEl.remove();
+      }
+
+      const wrap = document.createElement('div');
+      wrap.className = 'msg';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      const initials = (user || 'U').toString().trim().slice(0,2).toUpperCase();
+      avatar.textContent = initials;
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = user;
+
+      bubble.appendChild(meta);
+
+      if (message) {
+        const text = document.createElement('div');
+        text.className = 'text';
+        text.innerHTML = escapeHtml(message);
+        bubble.appendChild(text);
+      }
+
+      if (image) {
+        const img = document.createElement('img');
+        img.className = 'content-image';
+        img.src = image; // data URL
+        img.alt = 'sent image';
+        bubble.appendChild(img);
+      }
+
+      const time = document.createElement('span');
+      time.className = 'time';
+      const date = new Date(ts || Date.now());
+      time.textContent = date.toLocaleString();
+
+      bubble.appendChild(time);
+
+      wrap.appendChild(avatar);
+      wrap.appendChild(bubble);
+
+      chatEl.appendChild(wrap);
+      // auto-scroll to bottom
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    // listen for new messages (limit to last 400)
+    const aliveRef = db.ref('alivechat').limitToLast(400);
+    aliveRef.off(); // ensure no duplicate listeners
+    aliveRef.on('child_added', (snap) => {
+      const val = snap.val();
+      if (val && (val.message || val.image)) {
+        addMessageToDOM(val);
+      }
+    });
+
+    // send text message
+    async function sendMessage() {
+      const txt = inputEl.value.trim();
+      if (!txt) return;
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+      try {
+        const item = {
+          user: username,
+          message: txt,
+          image: null,
+          ts: Date.now()
+        };
+        await db.ref('alivechat').push(item);
+        inputEl.value = '';
+      } catch (e) {
+        console.error('send error', e);
+        alert('Error sending message.');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send';
+      }
+    }
+
+    // handle image selection and upload as dataURL (simple test/demo approach)
+    async function sendImageFile(file) {
+      if (!file) return;
+      imageBtn.disabled = true;
+      imageBtn.textContent = 'Uploading...';
+
+      // limit file size (optional): 3.5MB
+      const maxBytes = 3.5 * 1024 * 1024;
+      if (file.size > maxBytes) {
+        alert('Image too big. Please choose a smaller image (max ~3.5MB).');
+        imageBtn.disabled = false;
+        imageBtn.textContent = 'Image';
+        return;
+      }
+
+      try {
+        const dataURL = await fileToDataURL(file);
+        const item = {
+          user: username,
+          message: null,
+          image: dataURL,
+          ts: Date.now()
+        };
+        await db.ref('alivechat').push(item);
+      } catch (e) {
+        console.error('image upload error', e);
+        alert('Error uploading image.');
+      } finally {
+        imageBtn.disabled = false;
+        imageBtn.textContent = 'Image';
+      }
+    }
+
+    function fileToDataURL(file) {
+      return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+    }
+
+    // send on button or enter
+    sendBtn.addEventListener('click', sendMessage);
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // image button triggers hidden file input
+    imageBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (f) sendImageFile(f);
+      fileInput.value = ''; // reset
+    });
+
+    // Testing page button
+    testingBtn.addEventListener('click', () => {
+      // navigate to center.html (same folder)
+      window.location.href = 'center.html';
+    });
+
+    // show empty text if no messages after a bit
+    setTimeout(() => {
+      if (!chatEl.querySelector('.msg')) {
+        emptyEl.textContent = 'No messages yet. Say hi!';
+      }
+    }, 1200);
+  </script>
+</body>
+        </html>
